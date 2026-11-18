@@ -99,9 +99,12 @@ def read_cwd(pid):
         return ""
 
 
+SELF_NAMES = {os.path.basename(__file__), os.path.basename(sys.argv[0] or "")}
+
+
 def own_tree(procs):
-    """Pids belonging to this tool itself, so it does not bill itself as load."""
-    mine = {os.getpid()}
+    """This tool's own processes: polling overhead is not user workload."""
+    mine = {pid for pid, st in procs.items() if st["comm"] in SELF_NAMES}
     changed = True
     while changed:
         changed = False
@@ -343,7 +346,8 @@ def sample(interval, step=0.2):
     for sess in sessions.values():
         sess["procs"].sort(key=lambda p: (p["cpu"], p["rss"]), reverse=True)
         busiest = [p for p in sess["procs"] if p["cpu"] >= 1.0][:3]
-        sess["top"] = ", ".join("%s %d%%" % (p["comm"][:18], round(p["cpu"])) for p in busiest)
+        sess["top_list"] = [("%s %d%%" % (p["comm"][:18], round(p["cpu"]))) for p in busiest]
+        sess["top"] = ", ".join(sess["top_list"])
         sess["nproc"] = sum(1 for p in sess["procs"] if not p["exited"])
         sess["label"] = panes.get(sess["pane"], "")
     others.sort(key=lambda p: p["cpu"], reverse=True)
@@ -440,9 +444,14 @@ def render(sessions, others, machine, machine_frac, args, cores, elapsed):
         cpu_col = "%6.1f" % s["cpu"]
         if use_color:
             cpu_col = colorize(cpu_col, s["cpu"], True)
-        top = s["top"]
-        if len(top) > topw:
-            top = top[: topw - 1] + "\u2026"
+        top = ""
+        for piece in s["top_list"]:
+            candidate = (top + ", " + piece) if top else piece
+            if len(candidate) > topw:
+                if not top:
+                    top = candidate[: topw - 1] + "\u2026"
+                break
+            top = candidate
         out.append(
             "  %s %-11s %7s %4d %-7s %-9s %-*s %s"
             % (cpu_col, bar(s["cpu"], peak), human_bytes(s["rss"]), s["nproc"],
