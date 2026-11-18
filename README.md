@@ -8,28 +8,32 @@ model CLI itself — is rolled into that session's row and labeled with the tmux
 pane it came from. One row per session, sorted by current usage.
 
 ```text
-22:01:19  machine 1200% of 12c (100% busy)  load 50.57 55.17 46.72  agents 818%  other 180%  unseen 202%
+22:07:49  machine 1200% of 12c (100% busy)  load 63.83 67.25 55.70  agents 718%  other 231%  unseen 252%
 
     CPU%                 RSS    N AGENT   SESSION   DIR                                  BUSIEST PROCS
-   410.5 ██████████     6.8G   54 claude  30:10.1   ~/projects/tui-terminal              rustc 36%, rustc 34%, cc1plus 32%
-   287.0 ███████···     2.1G   61 claude  30:8.2    ~/projects/next-os-paradigm          test_glyph0 73%, cc1 46%, cc1 28%
-    51.0 █·········     1.1G   25 claude  30:7.1    ~/projects/porygon-ai                pytest 30%, claude 16%, tea 2%
-    42.5 █·········   544.8M    8 claude  30:8.1    ~/projects/next-os-paradigm          cc1 23%, cc1 8%, claude 7%
-    13.5 ··········   459.3M    6 pi      30:17.1   ~/projects/c-utils                   python3 12%, pi 2%
-     3.5 ··········   626.5M   28 codex   30:2.1    ~/projects/personal-agent-os         codex 4%
-     3.0 ··········   630.5M    5 claude  30:6.1    ~/projects/c-utils                   claude 3%
-     2.5 ··········   295.1M    3 claude  30:2.1    ~/projects/personal-agent-os         claude 2%
-     1.5 ··········   194.5M    3 claude  30:3.1    ~/projects/penguin-melee             claude 2%
-     1.0 ··········   665.8M   14 claude  30:10.2   ~/projects/tui-terminal              claude 1%
-     1.0 ··········   327.9M    3 claude  30:6.2    ~/projects/c-utils                   claude 1%
-     1.0 ··········   395.7M    3 claude  30:12.1   ~/projects                           claude 1%
+   261.0 ██████████     1.9G   66 claude  app:1.1   ~/work/api-service                   runner 70%, cc1 38%, cc1 36%
+   250.0 ██████████     5.2G   37 claude  app:1.2   ~/work/web-client                    claude 29%, build 20%, linter 20%
+   105.5 ████······   720.5M   22 claude  app:2.1   ~/work/api-service                   runner 30%, build 17%, linter 14%
+    68.5 ███·······     2.5G   33 claude  build:1.1 ~/work/data-pipeline                 pytest 36%, python 20%, claude 6%
+    14.5 █·········   493.5M    6 pi      ops:1.1   ~/work/docs-site                     python3 12%, pi 2%
+     4.5 ··········   617.7M   28 codex   ops:1.2   ~/work/infra                         codex 4%
+     4.5 ··········   634.0M   14 claude  app:3.1   ~/work/web-client                    claude 4%
+     3.5 ··········   398.4M    3 claude  build:1.2 ~/work/cli-tool                      claude 4%
+     2.0 ··········   324.0M    3 claude  ops:2.1   ~/work/api-service                   claude 2%
+     1.5 ··········   194.8M    3 claude  app:2.2   ~/work/web-client                    claude 2%
+     1.0 ··········   629.1M    5 claude  ops:3.1   ~/work/docs-site                     claude 1%
+     1.0 ··········   326.8M    3 claude  build:2.1 ~/work/docs-site                     claude 1%
 
-  other processes (no agent ancestor): 180% across 759 procs
-    23.5    1.1G 1286589 /snap/firefox/9113/usr/lib/firefox/firefox
-    17.5    3.3G 1077380 /snap/firefox/9113/usr/lib/firefox/firefox -contentproc -isForBrowser -prefsHandle 0:56262 -p…
-    17.0  714.8M 2847218 /app/discord/Discord --type=renderer --crashpad-handler-pid=2449 --enable-crash-reporter=e172…
-    15.5   16.4M 46733   htop
+  other processes (no agent ancestor): 231% across 816 procs
+    22.5  668.1M 3472    chat --type=renderer
+    22.0  291.3M 3683    desktop-shell --mode=ubuntu
+    17.5   16.4M 3894    htop
+    16.0  213.7M 4105    linter
 ```
+
+> Captured with `agent-top -n 2 --top 4`. Project directories, tmux labels, and
+> desktop application names are genericized; the percentages, process counts, and
+> memory figures are from that run.
 
 ## Install
 
@@ -118,14 +122,14 @@ agent-top --json | jq '.sessions[] | {kind, tmux, cwd, cpu_pct, proc_count}'
   "sessions": [
     {
       "kind": "claude",
-      "root_pid": 4169595,
+      "root_pid": 1337,
       "pane": "%72",
-      "tmux": "30:10.1",
-      "cwd": "/home/travers/projects/tui-terminal",
+      "tmux": "app:1.1",
+      "cwd": "/home/dev/work/api-service",
       "cpu_pct": 324.0,
       "rss_bytes": 9276813312,
       "proc_count": 58,
-      "procs": [{"pid": 443474, "comm": "rustc", "cpu_pct": 63.0, "rss_bytes": 257110016}]
+      "procs": [{"pid": 1340, "comm": "rustc", "cpu_pct": 63.0, "rss_bytes": 257110016}]
     }
   ]
 }

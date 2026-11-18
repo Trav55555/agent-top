@@ -67,7 +67,7 @@ class MathTests(unittest.TestCase):
         self.assertEqual(at.pct(one_core, 0, 0), 0.0)
 
     def test_short_dir_never_exceeds_width(self):
-        for path in ("/a/b/c", "/home/travers/" + "x/" * 40, ""):
+        for path in ("/a/b/c", "/home/dev/" + "x/" * 40, ""):
             self.assertLessEqual(len(at.short_dir(path, 20)), 20, path)
 
     def test_human_bytes(self):
